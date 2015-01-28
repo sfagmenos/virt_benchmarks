@@ -13,14 +13,15 @@ FIO_TEST_DIR="fio_test"
 
 PBZIP_DIR="pbzip_test"
 
-TEST_PBZIP=0
+TEST_PBZIP=1
 TEST_KERNBENCH=1
-TEST_FIO=0
+TEST_FIO=1
 
 TIMELOG=time.txt
 TIME="/usr/bin/time --format=%e -o $TIMELOG --append"
 
 rm -f $TIMELOG
+touch $TIMELOG
 
 for i in time awk yes date bc pbzip2
 do
