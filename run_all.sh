@@ -2,6 +2,7 @@
 KERNEL="linux-3.17"
 KERNEL_TAR="$KERNEL.tar.gz"
 KERNEL_XZ="$KERNEL.tar.xz"
+KERNEL_BZ="$KERNEL.tar.xz.bz2"
 KB="kernbench"
 KB_VER="0.50"
 KB_TAR="$KB-$KB_VER.tar.gz"
@@ -17,7 +18,7 @@ TEST_PBZIP_REPEAT=3
 TEST_KERNBENCH_REPEAT=1
 TEST_FIO_REPEAT=3
 
-TIMELOG=time.txt
+TIMELOG=$(pwd)/time.txt
 TIME="/usr/bin/time --format=%e -o $TIMELOG --append"
 
 rm -f $TIMELOG
@@ -43,7 +44,6 @@ else
 	else
 		echo "$KERNEL_TAR is not here"
 		wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.17.tar.gz
-#I'd better to check checksum or at least file size
 	fi
 
 	tar xvfz $KERNEL_TAR
@@ -63,7 +63,15 @@ if [[ -f $KERNEL_XZ ]]; then
 else
 	echo "$KERNEL_XZ is not here"
 	wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.17.tar.xz
-#I'd better to check checksum or at least file size
+fi
+
+if [[ -f $KERNEL_BZ ]]; then
+	echo "$KERNEL_BZ is here"
+else
+	echo "$KERNEL_BZ is not here"
+	cp $KERNEL_XZ tmp
+	pbzip2 -p2 -m500 $KERNEL_XZ
+	mv tmp $KERNEL_XZ
 fi
 
 if [[ -f $FIO_DIR/$FIO ]]; then
@@ -105,26 +113,41 @@ iodepth=8
 ioengine=sync
 " > random-read-test.fio
 
-for i in `seq 1 $TEST_PBZIP_REPEAT`; do
+if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	mkdir $PBZIP_DIR 
-	cp $KERNEL_XZ $PBZIP_DIR
-	echo "pbzip2 compress" >> $TIMELOG
-	$TIME pbzip2 -p2 -m500 $PBZIP_DIR/$KERNEL.tar.xz
-	echo "pbzip2 decompress" >> $TIMELOG
-	$TIME pbzip2 -d -m500 -p2 $PBZIP_DIR/$KERNEL.tar.xz.bz2
-	rm -rf $PBZIP_DIR
-done 
 
-for i in `seq 1 $TEST_FIO_REPEAT`; do
+	echo "pbzip2 compress" >> $TIMELOG
+	for i in `seq 1 $TEST_PBZIP_REPEAT`; do
+		cp $KERNEL_XZ $PBZIP_DIR
+		$TIME pbzip2 -p2 -m500 $PBZIP_DIR/$KERNEL_XZ
+		rm $PBZIP_DIR/$KERNEL_BZ
+	done 
+
+	echo "pbzip2 decompress" >> $TIMELOG
+	for i in `seq 1 $TEST_PBZIP_REPEAT`; do
+		cp $KERNEL_BZ $PBZIP_DIR
+		$TIME pbzip2 -d -m500 -p2 $PBZIP_DIR/$KERNEL_BZ
+		rm $PBZIP_DIR/$KERNEL_XZ
+	done 
+
+	rm -rf $PBZIP_DIR
+fi
+
+if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	echo "fio random read" >> $TIMELOG
-	$TIME ./$FIO_DIR/$FIO --output fio_read.out random-read-test.fio
+	for i in `seq 1 $TEST_FIO_REPEAT`; do
+		./$FIO_DIR/$FIO random-read-test.fio | tee >(grep 'read : io' | awk '{print $7+0 }' >> $TIMELOG)
+	done
 	echo "fio random write" >> $TIMELOG
-	$TIME ./$FIO_DIR/$FIO --output fio_write.out random-write-test.fio
-done
+	for i in `seq 1 $TEST_FIO_REPEAT`; do
+		./$FIO_DIR/$FIO random-write-test.fio | tee >(grep 'write: io' | awk '{print $6+0 }' >> $TIMELOG)
+	done
+fi
 
 for i in `seq 1 $TEST_KERNBENCH_REPEAT`; do
 	pushd $KERNEL
-	./kernbench -M -f
+	echo "kernbench" >> $TIMELOG
+	./kernbench -M -f | tee >(grep 'Elapsed' | awk '{print $3 }' >> $TIMELOG)
 	popd
 done
 
