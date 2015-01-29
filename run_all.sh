@@ -133,7 +133,7 @@ if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	rm -rf $PBZIP_DIR
 fi
 
-if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
+if [[ ! $TEST_FIO_REPEAT == 0 ]]; then
 	echo "fio random read (in msec)" >> $TIMELOG
 	for i in `seq 1 $TEST_FIO_REPEAT`; do
 		./$FIO_DIR/$FIO random-read-test.fio | tee >(grep 'read : io' | awk '{print $6, $7 }' >> $TIMELOG)
