@@ -21,6 +21,11 @@ TEST_FIO_REPEAT=3
 TIMELOG=$(pwd)/time.txt
 TIME="/usr/bin/time --format=%e -o $TIMELOG --append"
 
+refresh() {
+	sync && echo 3 > /proc/sys/vm/drop_caches
+	sleep 15
+}
+
 rm -f $TIMELOG
 touch $TIMELOG
 
@@ -44,8 +49,8 @@ else
 	else
 		echo "$KERNEL_TAR is not here"
 		wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.17.tar.gz
+		sync
 	fi
-
 	tar xvfz $KERNEL_TAR
 fi
 
@@ -55,6 +60,7 @@ else
 	wget http://ftp.be.debian.org/pub/linux/kernel/people/ck/apps/kernbench/kernbench-0.50.tar.gz
 	tar xvfz $KB_TAR
 	cp $KB-$KB_VER/$KB $KERNEL
+	sync
 fi
 
 
@@ -63,6 +69,7 @@ if [[ -f $KERNEL_XZ ]]; then
 else
 	echo "$KERNEL_XZ is not here"
 	wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.17.tar.xz
+	sync
 fi
 
 if [[ -f $KERNEL_BZ ]]; then
@@ -72,6 +79,7 @@ else
 	cp $KERNEL_XZ tmp
 	pbzip2 -p2 -m500 $KERNEL_XZ
 	mv tmp $KERNEL_XZ
+	sync
 fi
 
 if [[ -f $FIO_DIR/$FIO ]]; then
@@ -88,6 +96,7 @@ else
 	else
 		echo "$FIO is not ready"
 	fi
+	sync
 fi
 
 
@@ -114,11 +123,13 @@ ioengine=sync
 " > random-read-test.fio
 
 if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
+	rm -rf $PBZIP_DIR
 	mkdir $PBZIP_DIR 
 
 	echo "pbzip2 compress (in sec)" >> $TIMELOG
 	for i in `seq 1 $TEST_PBZIP_REPEAT`; do
 		cp $KERNEL_XZ $PBZIP_DIR
+		refresh
 		$TIME pbzip2 -p2 -m500 $PBZIP_DIR/$KERNEL_XZ
 		rm $PBZIP_DIR/$KERNEL_BZ
 	done 
@@ -126,6 +137,7 @@ if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	echo "pbzip2 decompress (in sec)" >> $TIMELOG
 	for i in `seq 1 $TEST_PBZIP_REPEAT`; do
 		cp $KERNEL_BZ $PBZIP_DIR
+		refresh
 		$TIME pbzip2 -d -m500 -p2 $PBZIP_DIR/$KERNEL_BZ
 		rm $PBZIP_DIR/$KERNEL_XZ
 	done 
@@ -136,10 +148,12 @@ fi
 if [[ ! $TEST_FIO_REPEAT == 0 ]]; then
 	echo "fio random read (in msec)" >> $TIMELOG
 	for i in `seq 1 $TEST_FIO_REPEAT`; do
+		refresh
 		./$FIO_DIR/$FIO random-read-test.fio | tee >(grep 'read : io' | awk '{print $6, $7 }' >> $TIMELOG)
 	done
 	echo "fio random write (in msec)" >> $TIMELOG
 	for i in `seq 1 $TEST_FIO_REPEAT`; do
+		refresh
 		./$FIO_DIR/$FIO random-write-test.fio | tee >(grep 'write: io' | awk '{print $6+0 }' >> $TIMELOG)
 	done
 fi
@@ -147,7 +161,10 @@ fi
 for i in `seq 1 $TEST_KERNBENCH_REPEAT`; do
 	pushd $KERNEL
 	echo "kernbench in sec" >> $TIMELOG
+	refresh
 	./kernbench -M -f | tee >(grep 'Elapsed' | awk '{print $3 }' >> $TIMELOG)
 	popd
 done
+
+cat $TIMELOG
 
