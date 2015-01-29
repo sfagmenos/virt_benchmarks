@@ -13,9 +13,9 @@ FIO_TEST_DIR="fio_test"
 
 PBZIP_DIR="pbzip_test"
 
-TEST_PBZIP=1
-TEST_KERNBENCH=1
-TEST_FIO=1
+TEST_PBZIP_REPEAT=3
+TEST_KERNBENCH_REPEAT=1
+TEST_FIO_REPEAT=3
 
 TIMELOG=time.txt
 TIME="/usr/bin/time --format=%e -o $TIMELOG --append"
@@ -105,7 +105,7 @@ iodepth=8
 ioengine=sync
 " > random-read-test.fio
 
-if [[ $TEST_PBZIP == 1 ]]; then
+for i in `seq 1 $TEST_PBZIP_REPEAT`; do
 	mkdir $PBZIP_DIR 
 	cp $KERNEL_XZ $PBZIP_DIR
 	echo "pbzip2 compress" >> $TIMELOG
@@ -113,18 +113,18 @@ if [[ $TEST_PBZIP == 1 ]]; then
 	echo "pbzip2 decompress" >> $TIMELOG
 	$TIME pbzip2 -d -m500 -p2 $PBZIP_DIR/$KERNEL.tar.xz.bz2
 	rm -rf $PBZIP_DIR
-fi
+done 
 
-if [[ $TEST_FIO == 1 ]]; then
+for i in `seq 1 $TEST_FIO_REPEAT`; do
 	echo "fio random read" >> $TIMELOG
 	$TIME ./$FIO_DIR/$FIO --output fio_read.out random-read-test.fio
 	echo "fio random write" >> $TIMELOG
 	$TIME ./$FIO_DIR/$FIO --output fio_write.out random-write-test.fio
-fi
+done
 
-if [[ $TEST_KERNBENCH == 1 ]]; then
+for i in `seq 1 $TEST_KERNBENCH_REPEAT`; do
 	pushd $KERNEL
 	./kernbench -M -f
 	popd
+done
 
-fi
