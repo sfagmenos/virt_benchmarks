@@ -116,14 +116,14 @@ ioengine=sync
 if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	mkdir $PBZIP_DIR 
 
-	echo "pbzip2 compress" >> $TIMELOG
+	echo "pbzip2 compress (in sec)" >> $TIMELOG
 	for i in `seq 1 $TEST_PBZIP_REPEAT`; do
 		cp $KERNEL_XZ $PBZIP_DIR
 		$TIME pbzip2 -p2 -m500 $PBZIP_DIR/$KERNEL_XZ
 		rm $PBZIP_DIR/$KERNEL_BZ
 	done 
 
-	echo "pbzip2 decompress" >> $TIMELOG
+	echo "pbzip2 decompress (in sec)" >> $TIMELOG
 	for i in `seq 1 $TEST_PBZIP_REPEAT`; do
 		cp $KERNEL_BZ $PBZIP_DIR
 		$TIME pbzip2 -d -m500 -p2 $PBZIP_DIR/$KERNEL_BZ
@@ -134,11 +134,11 @@ if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 fi
 
 if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
-	echo "fio random read" >> $TIMELOG
+	echo "fio random read (in msec)" >> $TIMELOG
 	for i in `seq 1 $TEST_FIO_REPEAT`; do
 		./$FIO_DIR/$FIO random-read-test.fio | tee >(grep 'read : io' | awk '{print $7+0 }' >> $TIMELOG)
 	done
-	echo "fio random write" >> $TIMELOG
+	echo "fio random write (in msec)" >> $TIMELOG
 	for i in `seq 1 $TEST_FIO_REPEAT`; do
 		./$FIO_DIR/$FIO random-write-test.fio | tee >(grep 'write: io' | awk '{print $6+0 }' >> $TIMELOG)
 	done
@@ -146,7 +146,7 @@ fi
 
 for i in `seq 1 $TEST_KERNBENCH_REPEAT`; do
 	pushd $KERNEL
-	echo "kernbench" >> $TIMELOG
+	echo "kernbench in sec" >> $TIMELOG
 	./kernbench -M -f | tee >(grep 'Elapsed' | awk '{print $3 }' >> $TIMELOG)
 	popd
 done
