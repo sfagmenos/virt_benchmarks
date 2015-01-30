@@ -162,7 +162,7 @@ for i in `seq 1 $TEST_KERNBENCH_REPEAT`; do
 	pushd $KERNEL
 	echo "kernbench in sec" >> $TIMELOG
 	refresh
-	./kernbench -M -f | tee >(grep 'Elapsed' | awk '{print $3 }' >> $TIMELOG)
+	./kernbench -M -H -f | tee >(grep 'Elapsed' | awk '{print $3 }' >> $TIMELOG)
 	popd
 done
 
