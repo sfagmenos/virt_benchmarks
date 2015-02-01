@@ -29,9 +29,9 @@ refresh() {
 rm -f $TIMELOG
 touch $TIMELOG
 
-apt-get install -y time bc pbzip2 gawk
+apt-get install -y time bc pbzip2 gawk wget
 
-for i in time awk yes date bc pbzip2
+for i in time awk yes date bc pbzip2 wget
 do
 	iname=`which $i`
 	if [[ ! -a $iname ]] ; then
