@@ -53,7 +53,8 @@ else
 		wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.17.tar.gz
 		sync
 	fi
-	tar xvfz $KERNEL_TAR
+	echo "Extracing kernel tar..."
+	tar xfz $KERNEL_TAR
 fi
 
 if [[ -f $KERNEL/$KB ]]; then
