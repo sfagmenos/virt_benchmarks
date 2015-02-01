@@ -29,6 +29,8 @@ refresh() {
 rm -f $TIMELOG
 touch $TIMELOG
 
+apt-get install -y time bc pbzip2 gawk
+
 for i in time awk yes date bc pbzip2
 do
 	iname=`which $i`
