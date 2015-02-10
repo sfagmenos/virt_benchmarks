@@ -107,7 +107,7 @@ echo "; random write of 128mb of data
 
 [random-write]
 rw=randwrite
-filename=$KERNEL_XZ
+filename=$FIO_TEST_DIR/$KERNEL_XZ
 direct=1
 invalidate=1
 iodepth=8
@@ -118,7 +118,7 @@ echo "; random read of 128mb of data
 
 [random-read]
 rw=randread
-filename=$KERNEL_XZ
+filename=$FIO_TEST_DIR/$KERNEL_XZ
 direct=1
 invalidate=1
 iodepth=8
@@ -149,16 +149,22 @@ if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 fi
 
 if [[ ! $TEST_FIO_REPEAT == 0 ]]; then
+	rm -rf $FIO_TEST_DIR
+	mkdir $FIO_TEST_DIR
+
 	echo "fio random read (in msec)" >> $TIMELOG
 	for i in `seq 1 $TEST_FIO_REPEAT`; do
+		cp $KERNEL_XZ $FIO_TEST_DIR
 		refresh
 		./$FIO_DIR/$FIO random-read-test.fio | tee >(grep 'read : io' | awk -F "=" '/1/ {print $5+0}' >> $TIMELOG)
 	done
 	echo "fio random write (in msec)" >> $TIMELOG
 	for i in `seq 1 $TEST_FIO_REPEAT`; do
+		cp $KERNEL_XZ $FIO_TEST_DIR
 		refresh
 		./$FIO_DIR/$FIO random-write-test.fio | tee >(grep 'write: io' | awk -F "=" '/1/ {print $5+0}' >> $TIMELOG)
 	done
+	rm -rf $FIO_TEST_DIR
 fi
 
 for i in `seq 1 $TEST_KERNBENCH_REPEAT`; do
