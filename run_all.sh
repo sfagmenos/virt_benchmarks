@@ -16,7 +16,7 @@ PBZIP_DIR="pbzip_test"
 
 TEST_PBZIP_REPEAT=3
 TEST_KERNBENCH_REPEAT=1
-TEST_FIO_REPEAT=3
+TEST_FIO_REPEAT=0
 
 TIMELOG=$(pwd)/time.txt
 TIME="/usr/bin/time --format=%e -o $TIMELOG --append"
@@ -85,45 +85,45 @@ else
 	sync
 fi
 
-if [[ -f $FIO_DIR/$FIO ]]; then
-	echo "$FIO is here"
-else
-	wget http://brick.kernel.dk/snaps/fio-2.1.10.tar.gz
-	tar xvfz $FIO_TAR
-	pushd $FIO_DIR
-	./configure
-	make
-	popd
-	if [[ -f $FIO_DIR/$FIO ]]; then
-		echo "$FIO is ready"
-	else
-		echo "$FIO is not ready"
-	fi
-	sync
-fi
+#if [[ -f $FIO_DIR/$FIO ]]; then
+#	echo "$FIO is here"
+#else
+#	wget http://brick.kernel.dk/snaps/fio-2.1.10.tar.gz
+#	tar xvfz $FIO_TAR
+#	pushd $FIO_DIR
+#	./configure
+#	make
+#	popd
+#	if [[ -f $FIO_DIR/$FIO ]]; then
+#		echo "$FIO is ready"
+#	else
+#		echo "$FIO is not ready"
+#	fi
+#	sync
+#fi
 
 
-echo "; random write of 128mb of data
+#echo "; random write of 128mb of data
 
-[random-write]
-rw=randwrite
-filename=$FIO_TEST_DIR/$KERNEL_XZ
-direct=1
-invalidate=1
-iodepth=8
-ioengine=sync
-" > random-write-test.fio
+#[random-write]
+#rw=randwrite
+#filename=$FIO_TEST_DIR/$KERNEL_XZ
+#direct=1
+#invalidate=1
+#iodepth=8
+#ioengine=sync
+#" > random-write-test.fio
 
-echo "; random read of 128mb of data
+#echo "; random read of 128mb of data
 
-[random-read]
-rw=randread
-filename=$FIO_TEST_DIR/$KERNEL_XZ
-direct=1
-invalidate=1
-iodepth=8
-ioengine=sync
-" > random-read-test.fio
+#[random-read]
+#rw=randread
+#filename=$FIO_TEST_DIR/$KERNEL_XZ
+#direct=1
+#invalidate=1
+#iodepth=8
+#ioengine=sync
+#" > random-read-test.fio
 
 if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	rm -rf $PBZIP_DIR
