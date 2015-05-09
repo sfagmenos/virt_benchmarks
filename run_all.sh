@@ -1,4 +1,5 @@
 #!/bin/bash
+MICRO=${1-0}
 KERNEL="linux-3.17"
 KERNEL_TAR="$KERNEL.tar.gz"
 KERNEL_XZ="$KERNEL.tar.xz"
@@ -133,7 +134,13 @@ if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	for i in `seq 1 $TEST_PBZIP_REPEAT`; do
 		cp $KERNEL_XZ $PBZIP_DIR
 		refresh
+		if [[ $MICRO == 1 ]]; then
+			echo 11 > /proc/virttest_one
+		fi
 		$TIME pbzip2 -p2 -m500 $PBZIP_DIR/$KERNEL_XZ
+		if [[ $MICRO == 1 ]]; then
+			echo 12 > /proc/virttest_one
+		fi
 		rm $PBZIP_DIR/$KERNEL_BZ
 	done 
 
@@ -141,7 +148,13 @@ if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	for i in `seq 1 $TEST_PBZIP_REPEAT`; do
 		cp $KERNEL_BZ $PBZIP_DIR
 		refresh
+		if [[ $MICRO == 1 ]]; then
+			echo 11 > /proc/virttest_one
+		fi
 		$TIME pbzip2 -d -m500 -p2 $PBZIP_DIR/$KERNEL_BZ
+		if [[ $MICRO == 1 ]]; then
+			echo 12 > /proc/virttest_one
+		fi
 		rm $PBZIP_DIR/$KERNEL_XZ
 	done 
 
@@ -171,7 +184,13 @@ for i in `seq 1 $TEST_KERNBENCH_REPEAT`; do
 	pushd $KERNEL
 	echo "kernbench in sec" >> $TIMELOG
 	refresh
+	if [[ $MICRO == 1 ]]; then
+		echo 11 > /proc/virttest_one
+	fi
 	./kernbench -M -H -f | tee >(grep 'Elapsed' | awk '{print $3 }' >> $TIMELOG)
+	if [[ $MICRO == 1 ]]; then
+		echo 12 > /proc/virttest_one
+	fi
 	popd
 done
 
