@@ -84,6 +84,7 @@ else
 	pbzip2 -p2 -m500 $KERNEL_XZ
 	mv tmp $KERNEL_XZ
 	sync
+	echo "$KERNEL_BZ was compressed"
 fi
 
 #if [[ -f $FIO_DIR/$FIO ]]; then
@@ -128,8 +129,8 @@ fi
 
 if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	rm -rf $PBZIP_DIR
-	mkdir $PBZIP_DIR 
-
+	mkdir $PBZIP_DIR
+	echo "compress start"
 	echo "pbzip2 compress (in sec)" >> $TIMELOG
 	for i in `seq 1 $TEST_PBZIP_REPEAT`; do
 		cp $KERNEL_XZ $PBZIP_DIR
@@ -142,8 +143,9 @@ if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 			echo 12 > /proc/virttest_one
 		fi
 		rm $PBZIP_DIR/$KERNEL_BZ
-	done 
-
+	done
+	echo "compress end"
+	echo "decompress start"
 	echo "pbzip2 decompress (in sec)" >> $TIMELOG
 	for i in `seq 1 $TEST_PBZIP_REPEAT`; do
 		cp $KERNEL_BZ $PBZIP_DIR
@@ -157,7 +159,7 @@ if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 		fi
 		rm $PBZIP_DIR/$KERNEL_XZ
 	done 
-
+	echo "decompress end"
 	rm -rf $PBZIP_DIR
 fi
 
