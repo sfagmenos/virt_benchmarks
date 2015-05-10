@@ -161,38 +161,38 @@ if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	rm -rf $PBZIP_DIR
 fi
 
-if [[ ! $TEST_FIO_REPEAT == 0 ]]; then
-	rm -rf $FIO_TEST_DIR
-	mkdir $FIO_TEST_DIR
+#if [[ ! $TEST_FIO_REPEAT == 0 ]]; then
+#	rm -rf $FIO_TEST_DIR
+#	mkdir $FIO_TEST_DIR
+#
+#	echo "fio random read (in msec)" >> $TIMELOG
+#	for i in `seq 1 $TEST_FIO_REPEAT`; do
+#		cp $KERNEL_XZ $FIO_TEST_DIR
+#		refresh
+#		./$FIO_DIR/$FIO random-read-test.fio | tee >(grep 'read : io' | awk 'BEGIN { FS = "=" }; {print $5+0}' >> $TIMELOG)
+#	done
+#	echo "fio random write (in msec)" >> $TIMELOG
+#	for i in `seq 1 $TEST_FIO_REPEAT`; do
+#		cp $KERNEL_XZ $FIO_TEST_DIR
+#		refresh
+#		./$FIO_DIR/$FIO random-write-test.fio | tee >(grep 'write: io' | awk 'BEGIN { FS = "="}; {print $5+0}' >> $TIMELOG)
+#	done
+#	rm -rf $FIO_TEST_DIR
+#fi
 
-	echo "fio random read (in msec)" >> $TIMELOG
-	for i in `seq 1 $TEST_FIO_REPEAT`; do
-		cp $KERNEL_XZ $FIO_TEST_DIR
-		refresh
-		./$FIO_DIR/$FIO random-read-test.fio | tee >(grep 'read : io' | awk 'BEGIN { FS = "=" }; {print $5+0}' >> $TIMELOG)
-	done
-	echo "fio random write (in msec)" >> $TIMELOG
-	for i in `seq 1 $TEST_FIO_REPEAT`; do
-		cp $KERNEL_XZ $FIO_TEST_DIR
-		refresh
-		./$FIO_DIR/$FIO random-write-test.fio | tee >(grep 'write: io' | awk 'BEGIN { FS = "="}; {print $5+0}' >> $TIMELOG)
-	done
-	rm -rf $FIO_TEST_DIR
-fi
-
-for i in `seq 1 $TEST_KERNBENCH_REPEAT`; do
-	pushd $KERNEL
-	echo "kernbench in sec" >> $TIMELOG
-	refresh
-	if [[ $MICRO == 1 ]]; then
-		echo 11 > /proc/virttest_one
-	fi
-	./kernbench -M -H -f | tee >(grep 'Elapsed' | awk '{print $3 }' >> $TIMELOG)
-	if [[ $MICRO == 1 ]]; then
-		echo 12 > /proc/virttest_one
-	fi
-	popd
-done
+#for i in `seq 1 $TEST_KERNBENCH_REPEAT`; do
+#	pushd $KERNEL
+#	echo "kernbench in sec" >> $TIMELOG
+#	refresh
+#	if [[ $MICRO == 1 ]]; then
+#		echo 11 > /proc/virttest_one
+#	fi
+#	./kernbench -M -H -f | tee >(grep 'Elapsed' | awk '{print $3 }' >> $TIMELOG)
+#	if [[ $MICRO == 1 ]]; then
+#		echo 12 > /proc/virttest_one
+#	fi
+#	popd
+#done
 
 cat $TIMELOG
 
