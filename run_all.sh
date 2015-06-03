@@ -87,45 +87,45 @@ else
 	echo "$KERNEL_BZ was compressed"
 fi
 
-#if [[ -f $FIO_DIR/$FIO ]]; then
-#	echo "$FIO is here"
-#else
-#	wget http://brick.kernel.dk/snaps/fio-2.1.10.tar.gz
-#	tar xvfz $FIO_TAR
-#	pushd $FIO_DIR
-#	./configure
-#	make
-#	popd
-#	if [[ -f $FIO_DIR/$FIO ]]; then
-#		echo "$FIO is ready"
-#	else
-#		echo "$FIO is not ready"
-#	fi
-#	sync
-#fi
+if [[ -f $FIO_DIR/$FIO ]]; then
+	echo "$FIO is here"
+else
+	wget http://brick.kernel.dk/snaps/fio-2.1.10.tar.gz
+	tar xvfz $FIO_TAR
+	pushd $FIO_DIR
+	./configure
+	make
+	popd
+	if [[ -f $FIO_DIR/$FIO ]]; then
+		echo "$FIO is ready"
+	else
+		echo "$FIO is not ready"
+	fi
+	sync
+fi
 
 
-#echo "; random write of 128mb of data
+echo "; random write of 128mb of data
 
-#[random-write]
-#rw=randwrite
-#filename=$FIO_TEST_DIR/$KERNEL_XZ
-#direct=1
-#invalidate=1
-#iodepth=8
-#ioengine=sync
-#" > random-write-test.fio
+[random-write]
+rw=randwrite
+filename=$FIO_TEST_DIR/$KERNEL_XZ
+direct=1
+invalidate=1
+iodepth=8
+ioengine=sync
+" > random-write-test.fio
 
-#echo "; random read of 128mb of data
+echo "; random read of 128mb of data
 
-#[random-read]
-#rw=randread
-#filename=$FIO_TEST_DIR/$KERNEL_XZ
-#direct=1
-#invalidate=1
-#iodepth=8
-#ioengine=sync
-#" > random-read-test.fio
+[random-read]
+rw=randread
+filename=$FIO_TEST_DIR/$KERNEL_XZ
+direct=1
+invalidate=1
+iodepth=8
+ioengine=sync
+" > random-read-test.fio
 
 if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	rm -rf $PBZIP_DIR
@@ -163,24 +163,24 @@ if [[ ! $TEST_PBZIP_REPEAT == 0 ]]; then
 	rm -rf $PBZIP_DIR
 fi
 
-#if [[ ! $TEST_FIO_REPEAT == 0 ]]; then
-#	rm -rf $FIO_TEST_DIR
-#	mkdir $FIO_TEST_DIR
-#
-#	echo "fio random read (in msec)" >> $TIMELOG
-#	for i in `seq 1 $TEST_FIO_REPEAT`; do
-#		cp $KERNEL_XZ $FIO_TEST_DIR
-#		refresh
-#		./$FIO_DIR/$FIO random-read-test.fio | tee >(grep 'read : io' | awk 'BEGIN { FS = "=" }; {print $5+0}' >> $TIMELOG)
-#	done
-#	echo "fio random write (in msec)" >> $TIMELOG
-#	for i in `seq 1 $TEST_FIO_REPEAT`; do
-#		cp $KERNEL_XZ $FIO_TEST_DIR
-#		refresh
-#		./$FIO_DIR/$FIO random-write-test.fio | tee >(grep 'write: io' | awk 'BEGIN { FS = "="}; {print $5+0}' >> $TIMELOG)
-#	done
-#	rm -rf $FIO_TEST_DIR
-#fi
+if [[ ! $TEST_FIO_REPEAT == 0 ]]; then
+	rm -rf $FIO_TEST_DIR
+	mkdir $FIO_TEST_DIR
+
+	echo "fio random read (in msec)" >> $TIMELOG
+	for i in `seq 1 $TEST_FIO_REPEAT`; do
+		cp $KERNEL_XZ $FIO_TEST_DIR
+		refresh
+		./$FIO_DIR/$FIO random-read-test.fio | tee >(grep 'read : io' | awk 'BEGIN { FS = "=" }; {print $5+0}' >> $TIMELOG)
+	done
+	echo "fio random write (in msec)" >> $TIMELOG
+	for i in `seq 1 $TEST_FIO_REPEAT`; do
+		cp $KERNEL_XZ $FIO_TEST_DIR
+		refresh
+		./$FIO_DIR/$FIO random-write-test.fio | tee >(grep 'write: io' | awk 'BEGIN { FS = "="}; {print $5+0}' >> $TIMELOG)
+	done
+	rm -rf $FIO_TEST_DIR
+fi
 
 #for i in `seq 1 $TEST_KERNBENCH_REPEAT`; do
 #	pushd $KERNEL
